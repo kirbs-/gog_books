@@ -1,9 +1,6 @@
 -extends "base.haml"
 -block content
-    abc
-
-    123
-
-    %ul
-        %li
-            hola
+    %div#grid.grid
+        -for book in books
+            %div.grid-item
+                %img src={{book.cover_url}}

@@ -1,6 +1,8 @@
 -extends "base.haml"
 -block content
-    %div#grid.grid
-        -for book in books
-            %div.grid-item
-                %img src={{book.cover_url}}
+    %div.container-fluid
+        %div.row-fluid
+            %div#grid.grid.col-xs-12
+                %div.col-centered
+                    -for book in books
+                        %div.grid-item style='background-image: url({{book.cover}})'

@@ -1,0 +1,17 @@
+.grid-item {
+  float: left;
+  width: 230px;
+  height: 350px;
+  background: #e6e5e4;
+  border: 2px solid #b6b5b4;
+  background-size: cover;
+  background-position: center;
+}
+
+.grid-item-width2 { width: 120px; }
+.grid-item-height2 { height: 120px; }
+
+.col-centered {
+    float: none;
+    margin: 0 auto;
+}

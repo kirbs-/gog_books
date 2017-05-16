@@ -51,6 +51,7 @@ class Book(db.Model):
     name = db.Column(db.String(500), index=True, unique=True)
     url = db.Column(db.String(1000), index=True, unique=True)
     cover_url = db.Column(db.String(1000), index=True, unique=True)
+    ratings = db.relationship('Rating', backref='book', lazy='dynamic')
     # covers = db.relationship('Photo', backref='book', lazy='dynamic')
 
     def __init__(self, url):
@@ -70,6 +71,28 @@ class Book(db.Model):
             db.session.commit()
         return self.cover_url
 
+    @property
+    def amazon_rating(self):
+        rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
+
+        if not rating:
+            soup = BeautifulSoup(self.page.text, 'html.parser')
+            amazon_rating = soup.find(id='acrPopover').get('title').split()[0]
+            amazon_review_count = soup.find(id='acrCustomerReviewText').text.split()[0].replace(',','')
+            self.ratings.append(Rating('amazon', amazon_rating, amazon_review_count))
+            db.session.commit()
+            rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
+
+        return rating
+
+    @property
+    def amazon_stars(self):
+        return self.amazon_rating.value
+
+    @property
+    def amazon_reviews(self):
+        return self.amazon_rating.review_count
+
 
 class Photo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -79,3 +102,17 @@ class Photo(db.Model):
     def __init__(self, book_id, filename):
         self.book_id = book_id
         self.filename = filename
+
+
+class Rating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
+    source = db.Column(db.String(500), index=True, unique=True)
+    value = db.Column(db.Float, index=True, unique=True)
+    review_count = db.Column(db.Integer, index=True, unique=True)
+
+    def __init__(self, source, value, review_count):
+        self.source = source
+        self.value = value
+        self.review_count = review_count
+

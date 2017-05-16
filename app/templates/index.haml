@@ -2,7 +2,8 @@
 -block content
     %div.container-fluid
         %div.row-fluid
-            %div#grid.grid.col-xs-12
-                %div.col-centered
+            %div#grid.grid
+                %div.text-center
                     -for book in books
-                        %div.grid-item style='background-image: url({{book.cover}})'
+                        %a href='#' role='button' data-toggle='popover' data-trigger='focus' data-content='{{book.amazon_stars}}'
+                            %div.grid-item style='background-image: url({{book.cover}}); display: inline-block'

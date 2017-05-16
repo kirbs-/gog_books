@@ -4,6 +4,10 @@ var $grid = $('.grid').packery({
   gutter: 10
 });
 
-$grid.imagesLoaded().progress( function() {
-  $grid.packery();
-});
+//$grid.imagesLoaded().progress( function() {
+//  $grid.packery();
+//});
+
+$(function () {
+  $('[data-toggle="popover"]').popover({trigger: 'hover'})
+})

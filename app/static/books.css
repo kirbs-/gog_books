@@ -7,10 +7,3 @@
   background-position: center;
 }
 
-.grid-item-width2 { width: 120px; }
-.grid-item-height2 { height: 120px; }
-
-.col-centered {
-    float: none;
-    margin: 0 auto;
-}

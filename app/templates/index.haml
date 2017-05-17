@@ -6,4 +6,6 @@
                 %div.text-center
                     -for book in books
                         %a href='#' role='button' data-toggle='popover' data-trigger='focus' data-content='{{book.amazon_stars}}'
-                            %div.grid-item style='background-image: url({{book.cover}}); display: inline-block'
+                            %div.grid-item style='background-image: url({{book.cover}}); display: inline-block' onmouseover='show_info(this)' data-background-image='url({{book.cover}}' onmouseout='show_cover(this)'
+                                %span.invisible
+                                    Amazon: {{book.amazon_stars or 'No Rating'}} ({{book.amazon_reviews or 'No'}} reviews)

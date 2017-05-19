@@ -4,18 +4,6 @@ var $grid = $('.grid').packery({
   gutter: 10
 });
 
-//$grid.imagesLoaded().progress( function() {
-//  $grid.packery();
-//});
-
-//$(function () {
-//  $('[data-toggle="popover"]').popover({trigger: 'hover'})
-//})
-
-//$('.carousel').carousel({
-//    interval: 1000000
-//})
-
 function show_info(element) {
     var $this = $(element);
     $this.css('background-image', '');

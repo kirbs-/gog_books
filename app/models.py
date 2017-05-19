@@ -66,8 +66,34 @@ class Book(db.Model):
         # self.covers = [Photo(self.id, photo_filename)]
 
     @staticmethod
+    def sort(sort_by):
+        if sort_by == 'Highest Rating':
+            return Book.highest_rated()
+        elif sort_by == 'Newest':
+            return Book.newest()
+        elif sort_by == 'Most Reviews':
+            return Book.most_reviewed()
+        elif sort_by == 'Author':
+            return Book.authors_asc()
+        else:
+            raise ValueError('Unknown sorting: {}'.format(sort_by))
+
+
+    @staticmethod
     def highest_rated():
-        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value)
+        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value.desc())
+
+    @staticmethod
+    def most_reviewed():
+        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.review_count.desc())
+
+    @staticmethod
+    def newest():
+        return Book.query.join(Show).order_by(Show.url.desc())
+
+    @staticmethod
+    def authors_asc():
+        return Book.query.order_by(Book.author)
 
     @property
     def isbn(self):

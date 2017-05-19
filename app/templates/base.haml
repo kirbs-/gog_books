@@ -9,15 +9,20 @@
     %body
         %nav.navbar.navbar-default
             %div
-                %form.navbar-form.navbar-right#search
+                %form.navbar-form.navbar-right#search action='sort' method='POST'
                     %div.input-group
-                        %select.form-control
+                        %select.form-control name='sortby'
                             %option
                                 Highest Rating
                             %option
-                                Most Recent
+                                Newest
+                            %option
+                                Most Reviews
+                            %option
+                                Author
+                            %option
+                                blah
                         %span.input-group-btn
-                            %button.btn.btn-primary type='submit'
-                                Update
+                            %input.btn.btn-primary type='submit' value='Update'
 
         -block content

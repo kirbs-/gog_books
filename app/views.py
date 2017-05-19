@@ -7,6 +7,11 @@ photos = UploadSet('photos', IMAGES)
 @app.route('/')
 @app.route('/index')
 def index():
-    # books = [{"cover_url": "https://images-na.ssl-images-amazon.com/images/I/513erhF-l2L._SY346_.jpg"}]
     books = models.Book.query.all()
     return render_template('index.haml', books=books)
+
+@app.route('/highes_rated')
+def highest_rated():
+    books = models.Book.highest_rated()
+    return render_template('index.haml', books=books)
+

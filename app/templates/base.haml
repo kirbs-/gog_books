@@ -7,4 +7,17 @@
         <link rel="stylesheet" type="text/css" href="static/books.css">
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     %body
+        %nav.navbar.navbar-default
+            %div
+                %form.navbar-form.navbar-right#search
+                    %div.input-group
+                        %select.form-control
+                            %option
+                                Highest Rating
+                            %option
+                                Most Recent
+                        %span.input-group-btn
+                            %button.btn.btn-primary type='submit'
+                                Update
+
         -block content

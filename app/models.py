@@ -44,6 +44,7 @@ class Show(db.Model):
         for link in self.book_links:
             self.books.append(Book(link))
 
+        db.session.add(self)
         db.session.commit()
 
 
@@ -122,7 +123,10 @@ class Book(db.Model):
     def cover(self):
         if not self.cover_url:
             soup = BeautifulSoup(self.page.text, 'html.parser')
-            self.cover_url = soup.find('div', {'id': 'ebooksImageBlock'}).find_all_next('img')[0]['src']
+            try:
+                self.cover_url = soup.find('div', {'id': 'ebooksImageBlock'}).find_all_next('img')[0]['src']
+            except AttributeError:
+                self.cover_url = soup.find('div', {'id': 'imageBlock'}).find_all_next('img')[0]['src']
             db.session.commit()
         return self.cover_url
 

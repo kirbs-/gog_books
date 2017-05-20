@@ -1,3 +1,4 @@
+<!doctype html>
 %html
     %head
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
@@ -24,5 +25,13 @@
                                 blah
                         %span.input-group-btn
                             %input.btn.btn-primary type='submit' value='Update'
+
+
+        -with messages = get_flashed_messages()
+            -if messages
+                %div.alert.alert-info#flash
+                    -for message in messages
+                        %span
+                            {{message}}
 
         -block content

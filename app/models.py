@@ -12,6 +12,17 @@ from bs4 import BeautifulSoup
 
 GOODREADS_API_KEY = 'IM6ZFnKSuYfT44hZBS92Q'
 
+
+def default_no_reviews(func):
+    def wrapper(self):
+        try:
+            return func(self)
+        except:
+            return 'None'
+
+    return wrapper
+
+
 class Show(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(500), index=True, unique=True)
@@ -79,7 +90,6 @@ class Book(db.Model):
         else:
             raise ValueError('Unknown sorting: {}'.format(sort_by))
 
-
     @staticmethod
     def highest_rated():
         return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value.desc())
@@ -97,6 +107,7 @@ class Book(db.Model):
         return Book.query.order_by(Book.author)
 
     @property
+    @default_no_reviews
     def isbn(self):
         if not self.isbn10:
             soup = BeautifulSoup(self.page.text, 'html.parser')
@@ -109,6 +120,7 @@ class Book(db.Model):
         return self.isbn10
 
     @property
+    @default_no_reviews
     def goodreads_id(self):
         if not self.goodreads_book_id:
             url = 'https://www.goodreads.com/book/isbn_to_id'
@@ -119,7 +131,9 @@ class Book(db.Model):
     def page(self):
         return requests.get(self.url)
 
+
     @property
+    @default_no_reviews
     def cover(self):
         if not self.cover_url:
             soup = BeautifulSoup(self.page.text, 'html.parser')
@@ -145,10 +159,12 @@ class Book(db.Model):
         return rating
 
     @property
+    @default_no_reviews
     def amazon_stars(self):
         return self.amazon_rating.value
 
     @property
+    @default_no_reviews
     def amazon_reviews(self):
         return self.amazon_rating.review_count
 
@@ -167,12 +183,26 @@ class Book(db.Model):
         return rating
 
     @property
+    @default_no_reviews
     def goodreads_stars(self):
         return self.goodreads_rating.value
 
     @property
+    @default_no_reviews
     def goodreads_reviews(self):
         return self.goodreads_rating.review_count
+
+    @staticmethod
+    def fetch(book_count, sort_type, size):
+        return Book.sort(sort_type)[book_count: (book_count + size)]
+
+    def serialize(self):
+        return {'amazon_stars': self.amazon_stars,
+                'amazon_reviews': self.amazon_reviews,
+                'goodreads_id': self.goodreads_id,
+                'goodreads_stars': self.goodreads_stars,
+                'goodreads_reviews': self.goodreads_reviews,
+                'cover': self.cover}
 
 
 class Photo(db.Model):
@@ -199,5 +229,6 @@ class Rating(db.Model):
 
 
 # class Author(db.Model):
+
 
 

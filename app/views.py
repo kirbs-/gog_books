@@ -1,6 +1,6 @@
 from app import app, models
 import config
-from flask import render_template, request, redirect, abort, flash
+from flask import render_template, request, redirect, abort, flash, jsonify
 from flask_uploads import UploadSet, IMAGES
 import onetimepass
 import time
@@ -11,7 +11,7 @@ photos = UploadSet('photos', IMAGES)
 @app.route('/')
 @app.route('/index')
 def index():
-    books = models.Book.query.all()
+    books = [book.serialize() for book in models.Book.query.limit(2).all()]
     return render_template('index.haml', books=books)
 
 @app.route('/sort', methods=['GET','POST'])
@@ -36,3 +36,9 @@ def new_show1(show_num):
     show = models.Show("http://gog.show/{}".format(show_num))
     show.save_books()
     return redirect('/')
+
+
+@app.route('/fetch/<int:count>/<sort_type>/<int:size>')
+def fetch(count, sort_type, size):
+    # return jsonify([book.serialize() for book in models.Book.fetch(count, sort_type, size)])
+    return render_template('books.haml', books=models.Book.fetch(count, sort_type, size))

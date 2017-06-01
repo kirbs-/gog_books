@@ -28,17 +28,23 @@ function number_of_books_per_row(){
     return Math.trunc($(window).width()/230);
 }
 
+
+
 function load_books(){
-    var book_cnt = $('.grid-item').length;
-    var sort_type = $('#sortby').val();
-    var size = number_of_books_per_row();
-    $.ajax({
-        url: '/fetch/' + book_cnt + '/' + sort_type + '/' + size,
-        method: 'GET',
-        success: function(data){
-            $('#grid').append(data);
-        }
-    })
+    if(!window.books_loading){
+        window.books_loading = true;
+        var book_cnt = $('.grid-item').length;
+        var sort_type = $('#sortby').val();
+        var size = number_of_books_per_row();
+        $.ajax({
+            url: '/fetch/' + book_cnt + '/' + sort_type + '/' + size,
+            method: 'GET',
+            success: function(data){
+                $('#grid').append(data);
+                window.books_loading = false;
+            }
+        })
+    }
 }
 
 $(document).ready(function(){

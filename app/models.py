@@ -1,9 +1,10 @@
 from app import db
 from flask_uploads import UploadSet, IMAGES, configure_uploads
-import requests, xmltodict
+import requests, xmltodict, traceback
 from werkzeug.datastructures import FileStorage
 import app
 from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
 
 
 # UPLOADED_PHOTOS_DEST = '/app/static/images'
@@ -74,6 +75,9 @@ class Book(db.Model):
 
     def __init__(self, url):
         self.url = url
+        self.amazon_rating
+        self.goodreads_rating
+        self.cover
         # photo_filename = photos.save(FileStorage(requests.get(cover_url).content))
         # self.covers = [Photo(self.id, photo_filename)]
 
@@ -92,15 +96,15 @@ class Book(db.Model):
 
     @staticmethod
     def highest_rated():
-        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value.desc())
+        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value.desc(), Book.id).all()
 
     @staticmethod
     def most_reviewed():
-        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.review_count.desc())
+        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.review_count.desc()).all()
 
     @staticmethod
     def newest():
-        return Book.query.join(Show).order_by(Show.url.desc())
+        return Book.query.join(Show).order_by(Show.url.desc()).all()
 
     @staticmethod
     def authors_asc():
@@ -112,7 +116,7 @@ class Book(db.Model):
         if not self.isbn10:
             soup = BeautifulSoup(self.page.text, 'html.parser')
             for ele in soup.find(id='productDetailsTable').find_all('li'):
-                if 'ASIN' in ele.text:
+                if 'ASIN' in ele.text or 'ISBN-10' in ele.text:
                     self.isbn10 = ele.text.split()[1]
                     db.session.commit()
                     break
@@ -122,14 +126,16 @@ class Book(db.Model):
     @property
     @default_no_reviews
     def goodreads_id(self):
-        if not self.goodreads_book_id:
+        if not self.goodreads_book_id and self.isbn:
             url = 'https://www.goodreads.com/book/isbn_to_id'
-            self.goodreads_book_id = requests.get(url, params={'key': GOODREADS_API_KEY, 'isbn': self.isbn}).text
+            result = requests.get(url, params={'key': GOODREADS_API_KEY, 'isbn': self.isbn}).text
+            if result != '16173270': # default goodreads book id
+                self.goodreads_book_id = result
         return self.goodreads_book_id
 
     @property
     def page(self):
-        return requests.get(self.url)
+        return requests.get(self.url, headers={'User-Agent': UserAgent().random})
 
 
     @property
@@ -149,12 +155,16 @@ class Book(db.Model):
         rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
 
         if not rating:
-            soup = BeautifulSoup(self.page.text, 'html.parser')
-            amazon_rating = soup.find(id='acrPopover').get('title').split()[0]
-            amazon_review_count = soup.find(id='acrCustomerReviewText').text.split()[0].replace(',', '')
-            self.ratings.append(Rating('amazon', amazon_rating, amazon_review_count))
-            db.session.commit()
-            rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
+            try:
+                soup = BeautifulSoup(self.page.text, 'html.parser')
+                amazon_rating = soup.find(id='acrPopover').get('title').split()[0]
+                amazon_review_count = soup.find(id='acrCustomerReviewText').text.split()[0].replace(',', '')
+                self.ratings.append(Rating('amazon', amazon_rating, amazon_review_count))
+                db.session.commit()
+                rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
+            except:
+                print "Error fetching amazon metadata: {}".format(self.url)
+                traceback.print_exc()
 
         return rating
 
@@ -173,12 +183,16 @@ class Book(db.Model):
         rating = Rating.query.filter_by(book_id=self.id, source='goodreads').first()
 
         if not rating:
-            json = xmltodict.parse(requests.get('https://www.goodreads.com/book/show', params={'key': GOODREADS_API_KEY, 'id': self.goodreads_id}).text)
-            book_response = json['GoodreadsResponse']['book']
-            self.ratings.append(Rating('goodreads', book_response['average_rating'], book_response['ratings_count']))
-            self.description = book_response['description']
-            db.session.commit()
-            rating = Rating.query.filter_by(book_id=self.id, source='goodreads').first()
+            try:
+                json = xmltodict.parse(requests.get('https://www.goodreads.com/book/show', params={'key': GOODREADS_API_KEY, 'id': self.goodreads_id}).text)
+                book_response = json['GoodreadsResponse']['book']
+                self.ratings.append(Rating('goodreads', book_response['average_rating'], book_response['ratings_count']))
+                self.description = book_response['description']
+                db.session.commit()
+                rating = Rating.query.filter_by(book_id=self.id, source='goodreads').first()
+            except:
+                print "Error fetching goodreads metadata: {}".format(self.url)
+                traceback.print_exc()
 
         return rating
 
@@ -194,8 +208,9 @@ class Book(db.Model):
 
     @staticmethod
     def fetch(book_count, sort_type, size):
-        return Book.sort(sort_type)[book_count: (book_count + size)]
-
+        books = Book.sort(sort_type)[book_count: (book_count + size)]
+        print books
+        return books
     def serialize(self):
         return {'amazon_stars': self.amazon_stars,
                 'amazon_reviews': self.amazon_reviews,

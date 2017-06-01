@@ -11,7 +11,9 @@ photos = UploadSet('photos', IMAGES)
 @app.route('/')
 @app.route('/index')
 def index():
-    books = [book.serialize() for book in models.Book.query.limit(2).all()]
+    # books = models.Book.highest_rated().limit(20).all()
+    books = None
+    # books = [book.serialize() for book in models.Book.query.limit(2).all()]
     return render_template('index.haml', books=books)
 
 @app.route('/sort', methods=['GET','POST'])
@@ -41,4 +43,6 @@ def new_show1(show_num):
 @app.route('/fetch/<int:count>/<sort_type>/<int:size>')
 def fetch(count, sort_type, size):
     # return jsonify([book.serialize() for book in models.Book.fetch(count, sort_type, size)])
-    return render_template('books.haml', books=models.Book.fetch(count, sort_type, size))
+    books = models.Book.fetch(count, sort_type, size)
+    print [book.serialize() for book in books]
+    return render_template('books.haml', books=books)

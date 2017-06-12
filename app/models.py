@@ -96,15 +96,15 @@ class Book(db.Model):
 
     @staticmethod
     def highest_rated():
-        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.value.desc(), Book.id).all()
+        return Book.query.filter(Book.isbn10.isnot(None)).join(Rating).filter_by(source='amazon', ).order_by(Rating.value.desc(), Book.id).all()
 
     @staticmethod
     def most_reviewed():
-        return Book.query.join(Rating).filter_by(source='amazon').order_by(Rating.review_count.desc()).all()
+        return Book.query.filter(Book.isbn10.isnot(None)).join(Rating).filter_by(source='amazon').order_by(Rating.review_count.desc(), Book.id).all()
 
     @staticmethod
     def newest():
-        return Book.query.join(Show).order_by(Show.url.desc()).all()
+        return Book.query.filter(Book.isbn10.isnot(None)).join(Show).order_by(Show.url.desc(), Book.id).all()
 
     @staticmethod
     def authors_asc():

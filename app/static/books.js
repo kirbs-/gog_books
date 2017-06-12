@@ -49,4 +49,10 @@ function load_books(){
 
 $(document).ready(function(){
     load_books();
+
+    $('#sortby').change(function(e){
+        $('#grid').empty();
+        load_books();
+    });
 });
+

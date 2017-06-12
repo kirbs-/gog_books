@@ -44,5 +44,5 @@ def new_show1(show_num):
 def fetch(count, sort_type, size):
     # return jsonify([book.serialize() for book in models.Book.fetch(count, sort_type, size)])
     books = models.Book.fetch(count, sort_type, size)
-    print [book.serialize() for book in books]
+    # print [book.serialize() for book in books]
     return render_template('books.haml', books=books)

@@ -26,7 +26,7 @@ def default_no_reviews(func):
 
 class Show(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(500), index=True, unique=True)
+    name = db.Column(db.String(500), index=True)
     url = db.Column(db.String(1000), index=True, unique=True)
     number = db.Column(db.Integer)
     books = db.relationship('Book', backref='show', lazy='dynamic')
@@ -63,14 +63,14 @@ class Show(db.Model):
 class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     show_id = db.Column(db.Integer, db.ForeignKey('show.id'))
-    name = db.Column(db.String(500), index=True, unique=True)
-    url = db.Column(db.String(1000), index=True, unique=True)
-    cover_url = db.Column(db.String(1000), index=True, unique=True)
+    name = db.Column(db.String(500), index=True)
+    url = db.Column(db.String(1000), index=True)
+    cover_url = db.Column(db.String(1000), index=True)
     ratings = db.relationship('Rating', backref='book', lazy='dynamic')
     isbn10 = db.Column(db.String(1000), index=True, unique=True)
     isbn13 = db.Column(db.String(1000), index=True, unique=True)
-    goodreads_book_id = db.Column(db.String(1000), index=True, unique=True)
-    description = db.Column(db.String(4000), index=True, unique=True)
+    goodreads_book_id = db.Column(db.String(1000), index=True)
+    description = db.Column(db.String(4000), index=True)
     # covers = db.relationship('Photo', backref='book', lazy='dynamic')
 
     def __init__(self, url):
@@ -233,9 +233,9 @@ class Photo(db.Model):
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
-    source = db.Column(db.String(500), index=True, unique=True)
-    value = db.Column(db.Float, index=True, unique=True)
-    review_count = db.Column(db.Integer, index=True, unique=True)
+    source = db.Column(db.String(500), index=True)
+    value = db.Column(db.Float, index=True)
+    review_count = db.Column(db.Integer, index=True)
 
     def __init__(self, source, value, review_count):
         self.source = source

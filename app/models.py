@@ -53,8 +53,10 @@ class Show(db.Model):
         return out
 
     def save_books(self):
+        # TODO: add logic to check if book exists and commit after each book is added.
         for link in self.book_links:
             self.books.append(Book(link))
+            db.session.commit()
 
         db.session.add(self)
         db.session.commit()
@@ -64,7 +66,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     show_id = db.Column(db.Integer, db.ForeignKey('show.id'))
     name = db.Column(db.String(500), index=True)
-    url = db.Column(db.String(1000), index=True)
+    url = db.Column(db.String(1000), index=True, unique=True)
     cover_url = db.Column(db.String(1000), index=True)
     ratings = db.relationship('Rating', backref='book', lazy='dynamic')
     isbn10 = db.Column(db.String(1000), index=True, unique=True)
@@ -211,6 +213,7 @@ class Book(db.Model):
         books = Book.sort(sort_type)[book_count: (book_count + size)]
         print books
         return books
+
     def serialize(self):
         return {'amazon_stars': self.amazon_stars,
                 'amazon_reviews': self.amazon_reviews,

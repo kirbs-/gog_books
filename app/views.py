@@ -39,6 +39,10 @@ def new_show1(show_num):
     show.save_books()
     return redirect('/')
 
+@app.route('/all')
+def all():
+    return render_template('books.haml', books=models.Book.query.all())
+
 
 @app.route('/fetch/<int:count>/<sort_type>/<int:size>')
 def fetch(count, sort_type, size):

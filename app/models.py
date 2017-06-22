@@ -5,6 +5,7 @@ from werkzeug.datastructures import FileStorage
 import app
 from bs4 import BeautifulSoup
 from fake_useragent import UserAgent
+from datetime import datetime
 
 
 # UPLOADED_PHOTOS_DEST = '/app/static/images'
@@ -26,9 +27,10 @@ def default_no_reviews(func):
 
 class Show(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(500), index=True)
-    url = db.Column(db.String(1000), index=True, unique=True)
+    name = db.Column(db.String(4000), index=True)
+    url = db.Column(db.String(4000), index=True, unique=True)
     number = db.Column(db.Integer)
+    date = db.Column(db.Date, index=True)
     books = db.relationship('Book', backref='show', lazy='dynamic')
 
     def __init__(self, url):
@@ -52,12 +54,20 @@ class Show(db.Model):
                 pass
         return out
 
+    def show_data(self):
+        soup = BeautifulSoup(self.page.text, 'html.parser')
+        self.date = datetime.strptime(soup.find_all('span', {'class': 'the-time'})[0].text, '%B %d, %Y')
+        self.name = soup.find_all('h1', {'class': 'entry-title'})[0].text.split(':')[1].strip()
+        db.session.add(self)
+        db.session.commit()
+
     def save_books(self):
         # TODO: add logic to check if book exists and commit after each book is added.
         for link in self.book_links:
             self.books.append(Book(link))
-            db.session.commit()
+            # db.session.commit()
 
+        self.show_data()
         db.session.add(self)
         db.session.commit()
 
@@ -66,13 +76,14 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     show_id = db.Column(db.Integer, db.ForeignKey('show.id'))
     name = db.Column(db.String(500), index=True)
-    url = db.Column(db.String(4000), index=True)
-    cover_url = db.Column(db.String(4000), index=True)
+    url = db.Column(db.TEXT)
+    cover_url = db.Column(db.TEXT)
     ratings = db.relationship('Rating', backref='book', lazy='dynamic')
     isbn10 = db.Column(db.String(1000), index=True)
     isbn13 = db.Column(db.String(1000), index=True)
     goodreads_book_id = db.Column(db.String(1000))
-    description = db.Column(db.String(4000), index=True)
+    ignore = db.Column(db.String(10), index=True)
+    description = db.Column(db.TEXT)
     # covers = db.relationship('Photo', backref='book', lazy='dynamic')
 
     def __init__(self, url):
@@ -106,7 +117,7 @@ class Book(db.Model):
 
     @staticmethod
     def newest():
-        return Book.query.filter(Book.isbn10.isnot(None)).join(Show).order_by(Show.url.desc(), Book.id).all()
+        return Book.query.filter(Book.isbn10.isnot(None)).join(Show).order_by(Show.date.desc(), Book.id).all()
 
     @staticmethod
     def authors_asc():
@@ -237,8 +248,8 @@ class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'))
     source = db.Column(db.String(500), index=True)
-    value = db.Column(db.Float, index=True)
-    review_count = db.Column(db.Integer, index=True)
+    value = db.Column(db.Float)
+    review_count = db.Column(db.Integer)
 
     def __init__(self, source, value, review_count):
         self.source = source

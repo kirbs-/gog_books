@@ -34,7 +34,7 @@ function load_books(){
     if(!window.books_loading){
         window.books_loading = true;
         var book_cnt = $('.grid-item').length;
-        var sort_type = $('#sortby').val();
+        var sort_type = $('.sort-active').text();
         var size = number_of_books_per_row();
         $.ajax({
             url: '/fetch/' + book_cnt + '/' + sort_type + '/' + size,
@@ -54,5 +54,11 @@ $(document).ready(function(){
         $('#grid').empty();
         load_books();
     });
+
+    $('.sort').click(function(){
+        alert($(this).text());
+    });
 });
+
+
 

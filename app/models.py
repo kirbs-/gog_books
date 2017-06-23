@@ -1,6 +1,6 @@
 from app import db
 from flask_uploads import UploadSet, IMAGES, configure_uploads
-import requests, xmltodict, traceback
+import requests, xmltodict, traceback, re
 from werkzeug.datastructures import FileStorage
 import app
 from bs4 import BeautifulSoup
@@ -57,7 +57,7 @@ class Show(db.Model):
     def show_data(self):
         soup = BeautifulSoup(self.page.text, 'html.parser')
         self.date = datetime.strptime(soup.find_all('span', {'class': 'the-time'})[0].text, '%B %d, %Y')
-        self.name = soup.find_all('h1', {'class': 'entry-title'})[0].text.split(':')[1].strip()
+        self.name = soup.find_all('h1', {'class': 'entry-title'})[0].text
         db.session.add(self)
         db.session.commit()
 
@@ -96,7 +96,7 @@ class Book(db.Model):
 
     @staticmethod
     def sort(sort_by):
-        if sort_by == 'Highest Rating':
+        if sort_by == 'Highest Rated':
             return Book.highest_rated()
         elif sort_by == 'Newest':
             return Book.newest()
@@ -173,6 +173,7 @@ class Book(db.Model):
                 amazon_rating = soup.find(id='acrPopover').get('title').split()[0]
                 amazon_review_count = soup.find(id='acrCustomerReviewText').text.split()[0].replace(',', '')
                 self.ratings.append(Rating('amazon', amazon_rating, amazon_review_count))
+                self.name = soup.find_all('span', {'id': re.compile('.*roductTitle')})[0].text
                 db.session.commit()
                 rating = Rating.query.filter_by(book_id=self.id, source='amazon').first()
             except:

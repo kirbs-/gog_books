@@ -10,19 +10,21 @@
     %body
         %nav.navbar.navbar-default
             %div
-                %form.navbar-form.navbar-right#search action='sort' method='POST'
-                    %div.input-group
-                        %select.form-control#sortby name='sortby'
-                            %option
-                                Highest Rating
-                            %option
-                                Newest
-                            %option
-                                Most Reviews
-                            %option
-                                Author
-                            %option
-                                blah
+                %div.navbar-brand
+                    Grumpy Reads
+                %ul.nav.navbar-nav
+                    %li.dropdown
+                        %a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"
+                            Sorting
+                            %span.caret
+                        %ul.dropdown-menu
+                            %li
+                                %a.sort.sort-active href='#'
+                                    Highest Rated
+                            %li
+                                %a.sort href='#'
+                                    Newest
+
 
 
         -with messages = get_flashed_messages()

@@ -2,7 +2,7 @@
     %div.grid-item style='background-image: url({{book.cover}}); display: inline-block' onmouseover='show_info(this)' data-background-image='url({{book.cover}}' onmouseout='show_cover(this)'
         %span.invisible.box
             %h4
-                %a href={{book.url}}
+                %a href={{book.url}} rel="noopener noreferrer" target="_blank"
                     {{book.name}}
             Amazon: {{book.amazon_stars or 'No Rating'}} ({{book.amazon_reviews or 'No'}} reviews)
             %br

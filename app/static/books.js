@@ -28,6 +28,10 @@ function number_of_books_per_row(){
     return Math.trunc($(window).width()/230);
 }
 
+function number_of_rows(){
+    return Math.trunc($(window).height()/350) + 1;
+}
+
 
 
 function load_books(){
@@ -47,16 +51,35 @@ function load_books(){
     }
 }
 
+function initial_load_books(){
+    var book_cnt = 0;
+    var sort_type = $('.sort-active').text();
+    var size = number_of_books_per_row() * number_of_rows();
+    $.ajax({
+        url: '/fetch/' + book_cnt + '/' + sort_type + '/' + size,
+        method: 'GET',
+        success: function(data){
+            $('#grid').append(data);
+        }
+    })
+}
+
 $(document).ready(function(){
-    load_books();
+    initial_load_books();
 
     $('#sortby').change(function(e){
         $('#grid').empty();
         load_books();
     });
 
+    $('#sort-link').text('Sorting: Highest Rated').append('<span class="caret" />');
+
     $('.sort').click(function(){
-        alert($(this).text());
+        $('.sort-active').removeClass('sort-active');
+        $(this).addClass('sort-active');
+        $('#grid').empty();
+        $('#sort-link').text('Sorting: ' + $(this).text()).append('<span class="caret" />');
+        initial_load_books();
     });
 });
 

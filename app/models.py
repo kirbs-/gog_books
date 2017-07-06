@@ -12,7 +12,7 @@ from datetime import datetime
 # photos = UploadSet('photos', IMAGES)
 # configure_uploads(app.app, photos)
 
-GOODREADS_API_KEY = 'IM6ZFnKSuYfT44hZBS92Q'
+GOODREADS_API_KEY = ''
 
 
 def default_no_reviews(func):
